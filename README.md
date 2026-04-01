@@ -1,6 +1,6 @@
 # gr33n37-ip-changer
 
-Bash script that uses Tor to change your IP at unlimited intervals of 3 seconds
+Bash script that uses Tor to change your IP every 3 seconds (in default parameters)
 
 ![gp](https://github.com/gr33n37/gr33n37-ip-changer/assets/30112537/34e1c4e2-ec79-4ef3-b0a2-e99eee48bb4b)
 
