@@ -3,6 +3,8 @@
 CONFIG_FILE="./ip-changer.conf"
 source "$CONFIG_FILE"
 
+PATH=$PATH:/usr/games
+
 [[ "$UID" -ne 0 ]] && {
     echo "Script must be run as root."
     exit 1
@@ -17,7 +19,6 @@ install_packages() {
         *"Ubuntu"* | *"Debian"*)
             apt-get update
             apt-get install -y curl tor lolcat
-	    PATH=$PATH:/usr/games
             ;;
         *"Fedora"* | *"CentOS"* | *"Red Hat"* | *"Amazon Linux"*)
             yum update
@@ -34,7 +35,7 @@ install_packages() {
 }
 
 if ! command -v curl &> /dev/null || ! command -v tor &> /dev/null || ! command -v lolcat &> /dev/null; then
-    echo "Installing curl and tor"
+    echo "Installing required packages..."
     install_packages
 fi
 
@@ -52,7 +53,7 @@ get_ip() {
 }
 
 dololcat() {
-        if [ "$lolcat" -eq 1 ]; then
+        if [[ "$lolcat" -eq "1" ]]; then
                 echo -e "$@" | lolcat
         else
                 echo "$@"
@@ -65,13 +66,14 @@ change_ip() {
     dololcat -e "\033[34mNew IP address: $(get_ip)\033[0m"
 }
 
-clear
-
 LOGO_FILE="./logo.txt"
-if [[ -f "$LOGO_FILE" ]]; then
-	dololcat "$(cat "$LOGO_FILE")"
-fi
-
+entry() {
+	clear
+	if [[ -f "$LOGO_FILE" ]]; then
+		dololcat "$(cat "$LOGO_FILE")"
+	fi
+}
+entry
 
 getvalues() {
     	read -rp $'\033[34mEnter time interval in seconds (type 0 for infinite IP changes) [Default: 3]: \033[0m' _interval
@@ -91,16 +93,17 @@ getvalues() {
 verify_parameters() {
 	if [[ ! -f "$CONFIG_FILE" ]]; then
 		echo -e "interval=3\ntimes=0\nlolcat=1" > "$CONFIG_FILE"
-		source "$CONFIG_FILE"
 	fi
 	if [[ -z "$interval" || -z "$times" || -z "$lolcat" || ( "$lolcat" != 0 && "$lolcat" != 1 ) ]]; then
 		getvalues
 	fi 
+	source "$CONFIG_FILE"
+	entry
 }
 
 while true; do
     verify_parameters
-    if [ "$interval" -eq "0" ] || [ "$times" -eq "0" ]; then
+    if [[ "$interval" -eq "0" || "$times" -eq "0" ]]; then
         dololcat "Starting infinite IP changes"
         while true; do
             change_ip
